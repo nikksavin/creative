@@ -1,29 +1,30 @@
 <?php
 
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::get('/', function () {
-    return view('welcome');
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'laravelVersion' => Application::VERSION,
+        'phpVersion' => PHP_VERSION,
+    ]);
 });
 
-Route::get('/posts/index', [PostController::class, 'index']);
-Route::get('/posts/{post}/show', [PostController::class, 'show']);
-Route::get('/posts/store', [PostController::class, 'store']);
-Route::get('/posts/{post}/update', [PostController::class, 'update']);
-Route::get('/posts/{post}/destroy', [PostController::class, 'destroy']);
+Route::get('/dashboard', function () {
+    return Inertia::render('Dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('/message/index', [MessageController::class, 'index']);
-Route::get('/message/{message}/show', [MessageController::class, 'show']);
-Route::get('/message/store', [MessageController::class, 'store']);
-Route::get('/message/{message}/update', [MessageController::class, 'update']);
-Route::get('/message/{message}/destroy', [MessageController::class, 'destroy']);
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
+require __DIR__.'/auth.php';
 
-Route::get('/category/index', [CategoryController::class, 'index']);
-Route::get('/category/{category}/show', [CategoryController::class, 'show']);
-Route::get('/category/store', [CategoryController::class, 'store']);
-Route::get('/category/{category}/update', [CategoryController::class, 'update']);
-Route::get('/category/{category}/destroy', [CategoryController::class, 'destroy']);
+require __DIR__.'/admin.php';
+

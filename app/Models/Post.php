@@ -10,11 +10,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use App\Traits\LogsModelChanges;
+use Illuminate\Support\Facades\Storage;
 
 class Post extends Model
 {
     use HasFactory;
 
+    use LogsModelChanges;
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Profile::class);
@@ -48,5 +51,15 @@ class Post extends Model
     public function image(): MorphOne
     {
         return $this->morphOne(Image::class, 'imageable');
+    }
+
+    public function images(): MorphMany
+    {
+        return $this->morphMany(Image::class, 'imageable');
+    }
+
+    public function getImgUrlAttribute() :string
+    {
+        return Storage::disk('public')->url($this->img_path);
     }
 }
